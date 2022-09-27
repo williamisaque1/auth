@@ -9,10 +9,7 @@ export const authOptions = {
       // You can specify whatever fields you are expecting to be submitted.
       // e.g. domain, username, password, 2FA token, etc.
       // You can pass any HTML attribute to the <input> tag through the object.
-      credentials: {
-        username: { label: "Username", type: "text", placeholder: "jsmith" },
-        password: { label: "Password", type: "password" },
-      },
+
       async authorize({ email, senha }) {
         // You need to provide your own logic here that takes the credentials
         // submitted and returns either a object representing a user or value
@@ -26,10 +23,11 @@ export const authOptions = {
             body: JSON.stringify({ email, senha }),
             headers: { "Content-Type": "application/json" },
           });
-          const user = await res.json();
+          let user = await res.json();
 
           // If no error and we have user data, return it
           if (res.ok && user.token) {
+            user.accessToken = user.token;
             return user;
           }
           // Return null if user data could not be retrieved
@@ -40,28 +38,28 @@ export const authOptions = {
           //throw new Error(message);
         }
       },
-      callbacks: {
-        async session({ session, token }) {
-          if (token) {
-            session.name = token.name;
-          }
-          return session;
-        },
-        async jwt({ token, user }) {
-          if (user) {
-            token.name = user.name;
-          }
-          return token;
-        },
-      },
-      secret: process.env.AUTH_SECRET,
+      secret: process.env.NEXTAUTH_SECRET,
       pages: {
         signIn: "/login",
         error: "/login",
       },
-      jwt: {
-        secret: process.env.AUTH_SECRET,
+      callbacks: {
+        jwt: async ({ token, user, account, profile, isNewUser }) => {
+          token.accessToken = user.accessToken;
+          return Promise.resolve(token);
+        },
+        session: async ({ session, token, user }) => {
+          if (token) {
+            session.user;
+            session.user.accessToken = token.accessToken;
+          }
+          return Promise.resolve(session);
+        },
       },
+      jwt: {
+        secret: process.env.NEXTAUTH_SECRET,
+      },
+      debug: true,
     }),
   ],
 };

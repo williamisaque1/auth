@@ -4,6 +4,8 @@ import styles from "../styles/Home.module.css";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react"
+
+import { getToken } from "next-auth/jwt";
 export default function Login() {
 const [error, Seterrros] = useState('')
    const { data: session } = useSession()
@@ -19,6 +21,7 @@ const [error, Seterrros] = useState('')
  
      const result =  await  signIn('credentials', {email:datas.email, senha:datas.senha,redirect: false, callbackUrl:'/' })
     console.log(result)
+
     if(result.status == 401){
         return Seterrros(result.error)
     }else if (result.status == 200){
@@ -58,7 +61,7 @@ const [error, Seterrros] = useState('')
 
       <>
         Signed in as {session?.user.email} + {session.user.name} <br />
-        <button onClick={() => signOut()}>Sign out</button>
+        <button onClick={() => signOut({redirect:false,callbackUrl:'/'})}>Sign out</button>
       </>
     
  ):(
@@ -83,5 +86,13 @@ const [error, Seterrros] = useState('')
     </div>
     
   );
+}
+export  async function getServerSideProps({req}){
+console.log(await getToken({req}))
+return {
+  props:{
+
+  }
+}
 }
 

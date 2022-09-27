@@ -1,17 +1,20 @@
 import { unstable_getServerSession } from "next-auth/next";
-import { getSession } from "next-auth/react";
+import { getSession, getCsrfToken } from "next-auth/react";
+import { getToken } from "next-auth/jwt";
 import { authOptions } from "../pages/api/auth/[...nextauth]";
 
 async function protectedRouter(context) {
-  /*
   const session = await unstable_getServerSession(
     context.req,
     context.res,
     authOptions
   );
-  */
-  const session = await getSession(context);
+
+  const sessions = await getSession(context);
+  console.log("sessao");
   console.log(session);
+  console.log(sessions);
+
   if (false) {
     return {
       redirect: {
@@ -21,9 +24,7 @@ async function protectedRouter(context) {
     };
   } else {
     return {
-      props: {
-        session,
-      },
+      props: {},
     };
   }
 }
